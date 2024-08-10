@@ -2,6 +2,7 @@ const express = require("express");
 const persons = require("./persons.json");
 
 const app = express();
+app.use(express.json());
 
 app.get("/info", (req, res) => {
   res.send(`
@@ -23,6 +24,28 @@ app.get("/api/persons/:id", (req, res) => {
   }
 
   return res.json(person);
+});
+
+app.post("/api/persons", (req, res) => {
+  const { body } = req;
+
+  if (!body.name) {
+    return res.status(400).json({ message: "Person has no name!" });
+  }
+  if (!body.number) {
+    return res.status(400).json({ message: "Person has no phone number!" });
+  }
+
+  const person = persons.find((p) => p.name === body.name);
+  if (person) {
+    return res.status(400).json({
+      message: `${body.name} is already registered in this phonebook`,
+    });
+  }
+
+  const id = Math.floor(Math.random() * 1000).toString();
+  persons.push({ id, ...body });
+  return res.status(201).json({ message: "New person created!" });
 });
 
 app.delete("/api/persons/:id", (req, res) => {
