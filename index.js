@@ -14,6 +14,17 @@ app.get("/api/persons", (req, res) => {
   res.json(persons);
 });
 
+app.get("/api/persons/:id", (req, res) => {
+  const { id } = req.params;
+  const person = persons.find((p) => p.id === id);
+
+  if (!person) {
+    return res.status(404).json({ message: "Person not found!" });
+  }
+
+  return res.json(person);
+});
+
 app.listen(3001, () => {
   console.log("Starting server on port 3001");
 });
