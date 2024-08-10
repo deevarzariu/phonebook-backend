@@ -25,6 +25,19 @@ app.get("/api/persons/:id", (req, res) => {
   return res.json(person);
 });
 
+app.delete("/api/persons/:id", (req, res) => {
+  const { id } = req.params;
+  const person = persons.find((p) => p.id === id);
+
+  if (!person) {
+    return res.status(404).json({ message: "Person not found!" });
+  }
+
+  const index = persons.indexOf(person);
+  persons.splice(index, 1);
+  return res.status(200).json({ message: "Person removed" });
+});
+
 app.listen(3001, () => {
   console.log("Starting server on port 3001");
 });
