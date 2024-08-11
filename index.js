@@ -70,7 +70,7 @@ app.delete("/api/persons/:id", (req, res) => {
 
   const index = persons.indexOf(person);
   persons.splice(index, 1);
-  return res.status(200).json({ message: "Person removed" });
+  return res.status(200).json(person);
 });
 
 app.listen(3001, () => {
