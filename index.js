@@ -54,8 +54,10 @@ app.post("/api/persons", (req, res) => {
   }
 
   const id = Math.floor(Math.random() * 1000).toString();
-  persons.push({ id, ...body });
-  return res.status(201).json({ message: "New person created!" });
+  const newPerson = { id, ...body };
+
+  persons.push(newPerson);
+  return res.status(201).json(newPerson);
 });
 
 app.delete("/api/persons/:id", (req, res) => {
