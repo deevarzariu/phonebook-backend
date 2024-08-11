@@ -73,6 +73,7 @@ app.delete("/api/persons/:id", (req, res) => {
   return res.status(200).json(person);
 });
 
-app.listen(3001, () => {
-  console.log("Starting server on port 3001");
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Starting server on port ${PORT}`);
 });
