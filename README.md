@@ -2,4 +2,4 @@ This is a web service created for the assignments in Part 3 of the Fullstack Ope
 
 This web service serves the backend for the phonebook app created in Part 2. You can find my latest implementation here: https://github.com/deevarzariu/fullstackopen/tree/main/part3/phonebook.
 
-This web service was deployed in Render. You can find it here: https://phonebook-backend-wxcw.onrender.com/api/persons.
+This web service was deployed in Render. You can find it here: https://phonebook-backend-wxcw.onrender.com.
