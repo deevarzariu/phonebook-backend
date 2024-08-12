@@ -1,7 +1,9 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
 const morgan = require("morgan");
-const persons = require("./persons.json");
+const Person = require("./models/person");
 
 morgan.token("body", (req) => {
   return JSON.stringify(req.body);
@@ -15,6 +17,19 @@ app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body")
 );
 
+const url = process.env.MONGODB_URI;
+
+mongoose.set("strictQuery", false);
+
+mongoose
+  .connect(url)
+  .then(() => {
+    console.log("connected to MongoDB");
+  })
+  .catch((error) => {
+    console.log("error connecting to MongoDB:", error.message);
+  });
+
 app.get("/info", (req, res) => {
   res.send(`
     <p>Phonebook has info for ${persons.length} people</p>
@@ -23,42 +38,43 @@ app.get("/info", (req, res) => {
 });
 
 app.get("/api/persons", (req, res) => {
-  res.json(persons);
+  Person.find({}).then((people) => {
+    res.json(people);
+  });
 });
 
 app.get("/api/persons/:id", (req, res) => {
   const { id } = req.params;
-  const person = persons.find((p) => p.id === id);
 
-  if (!person) {
-    return res.status(404).json({ message: "Person not found!" });
-  }
-
-  return res.json(person);
+  Person.findOne({ _id: id }).then((person) => {
+    res.json(person);
+  });
 });
 
 app.post("/api/persons", (req, res) => {
-  const { body } = req;
+  const {
+    body: { name, number },
+  } = req;
 
-  if (!body.name) {
+  if (!name) {
     return res.status(400).json({ message: "Person has no name!" });
   }
-  if (!body.number) {
+  if (!number) {
     return res.status(400).json({ message: "Person has no phone number!" });
   }
 
-  const person = persons.find((p) => p.name === body.name);
-  if (person) {
-    return res.status(400).json({
-      message: `${body.name} is already registered in this phonebook`,
+  Person.findOne({ name }).then((person) => {
+    if (person) {
+      return res.status(400).json({
+        message: `${name} is already registered in this phonebook`,
+      });
+    }
+
+    const newPerson = new Person({ name, number });
+    newPerson.save().then(() => {
+      return res.status(201).json(newPerson);
     });
-  }
-
-  const id = Math.floor(Math.random() * 1000).toString();
-  const newPerson = { id, ...body };
-
-  persons.push(newPerson);
-  return res.status(201).json(newPerson);
+  });
 });
 
 app.delete("/api/persons/:id", (req, res) => {
