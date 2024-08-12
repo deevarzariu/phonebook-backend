@@ -77,17 +77,44 @@ app.post("/api/persons", (req, res) => {
   });
 });
 
-app.delete("/api/persons/:id", (req, res) => {
+app.put("/api/persons/:id", (req, res) => {
   const { id } = req.params;
-  const person = persons.find((p) => p.id === id);
+  const {
+    body: { name, number },
+  } = req;
 
-  if (!person) {
-    return res.status(404).json({ message: "Person not found!" });
+  if (!name) {
+    return res.status(400).json({ message: "Person has no name!" });
+  }
+  if (!number) {
+    return res.status(400).json({ message: "Person has no phone number!" });
   }
 
-  const index = persons.indexOf(person);
-  persons.splice(index, 1);
-  return res.status(200).json(person);
+  Person.findByIdAndUpdate(id, { name, number }, { new: true })
+    .then((person) => {
+      return res.status(201).json(person);
+    })
+    .catch((error) => next(error));
+});
+
+app.delete("/api/persons/:id", (req, res, next) => {
+  const { id } = req.params;
+
+  Person.findByIdAndDelete(id)
+    .then((result) => {
+      return res.status(200).json(result);
+    })
+    .catch((error) => next(error));
+});
+
+app.use((error, req, res, next) => {
+  console.log(error);
+
+  if (error.name === "CastError") {
+    return res.status(400).send({ error: "Incorrect id format" });
+  }
+
+  next(error);
 });
 
 const PORT = process.env.PORT || 3001;
