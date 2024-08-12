@@ -31,10 +31,12 @@ mongoose
   });
 
 app.get("/info", (req, res) => {
-  res.send(`
-    <p>Phonebook has info for ${persons.length} people</p>
-    <p>${new Date()}</p>
-  `);
+  Person.countDocuments().then((nbPeople) => {
+    res.send(`
+      <p>Phonebook has info for ${nbPeople} people</p>
+      <p>${new Date()}</p>
+    `);
+  });
 });
 
 app.get("/api/persons", (req, res) => {
