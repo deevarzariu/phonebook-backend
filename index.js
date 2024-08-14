@@ -58,10 +58,6 @@ app.post("/api/persons", (req, res, next) => {
     body: { name, number },
   } = req;
 
-  if (!number) {
-    return res.status(400).json({ message: "Person has no phone number!" });
-  }
-
   Person.findOne({ name }).then((person) => {
     if (person) {
       return res.status(400).json({
@@ -84,10 +80,6 @@ app.put("/api/persons/:id", (req, res, next) => {
   const {
     body: { name, number },
   } = req;
-
-  if (!number) {
-    return res.status(400).json({ message: "Person has no phone number!" });
-  }
 
   Person.findByIdAndUpdate(
     id,
