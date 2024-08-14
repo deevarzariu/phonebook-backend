@@ -53,14 +53,11 @@ app.get("/api/persons/:id", (req, res) => {
   });
 });
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
   const {
     body: { name, number },
   } = req;
 
-  if (!name) {
-    return res.status(400).json({ message: "Person has no name!" });
-  }
   if (!number) {
     return res.status(400).json({ message: "Person has no phone number!" });
   }
@@ -73,26 +70,30 @@ app.post("/api/persons", (req, res) => {
     }
 
     const newPerson = new Person({ name, number });
-    newPerson.save().then(() => {
-      return res.status(201).json(newPerson);
-    });
+    newPerson
+      .save()
+      .then(() => {
+        return res.status(201).json(newPerson);
+      })
+      .catch((error) => next(error));
   });
 });
 
-app.put("/api/persons/:id", (req, res) => {
+app.put("/api/persons/:id", (req, res, next) => {
   const { id } = req.params;
   const {
     body: { name, number },
   } = req;
 
-  if (!name) {
-    return res.status(400).json({ message: "Person has no name!" });
-  }
   if (!number) {
     return res.status(400).json({ message: "Person has no phone number!" });
   }
 
-  Person.findByIdAndUpdate(id, { name, number }, { new: true })
+  Person.findByIdAndUpdate(
+    id,
+    { name, number },
+    { new: true, runValidators: true, context: "query" }
+  )
     .then((person) => {
       return res.status(201).json(person);
     })
@@ -113,7 +114,11 @@ app.use((error, req, res, next) => {
   console.log(error);
 
   if (error.name === "CastError") {
-    return res.status(400).send({ error: "Incorrect id format" });
+    return res.status(400).json({ error: "Incorrect id format" });
+  }
+
+  if (error.name === "ValidationError") {
+    return res.status(400).json({ error: error.message, name: error.name });
   }
 
   next(error);
